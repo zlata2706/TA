@@ -1,0 +1,20 @@
+#include <iostream>
+void insertionSort(int* arr, int size) {
+	for (int i = 1;i < size; i++) {
+		int key = arr[i];
+		int j;
+		for (j = i - 1;j >= 0 && arr[j] > key;j--) {
+			arr[j + 1] = arr[j];
+		}
+		arr[j + 1] = key;
+	}
+}
+int main() {
+	int numbers[] = {10, 90, 95, 30, 45, 60, 57, 28, 5};
+	int SIZE = std::size(numbers);
+	//selectionSort(numbers, SIZE);
+	insertionSort(numbers, SIZE);
+  for (int i = 0;i < SIZE;i++) {
+	  std::cout << numbers[i] << ' ';
+}
+}
