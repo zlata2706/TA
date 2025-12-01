@@ -1,0 +1,33 @@
+#include <iostream>
+void QuickSort(int arr[], int first, int last) {
+	int pivot = arr[(first + last) / 2];
+	int i = first;
+	int j = last;
+	do {
+		while (arr[i] < pivot) {
+			i++;
+		}
+		while (arr[j] > pivot) {
+			j--;
+		}
+		if (i <= j) {
+			int temp = arr[j];
+			arr[j] = arr[i];
+			arr[i] = temp;
+			i++;
+			j--;
+		}
+	} while (i <= j);
+	if(first<j)
+		QuickSort(arr, first, j);
+	if (last > i)
+		QuickSort(arr, i, last);
+}
+int main() {
+	int numbers[] = { 10, 90, 95, 30, 45, 60, 57, 28, 5 };
+	int SIZE = std::size(numbers);
+	QuickSort(numbers, 0, SIZE - 1);
+	for (int n = 0; n < SIZE; n++) {
+		std::cout << numbers[n] << ' ';
+	}
+}
