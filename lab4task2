@@ -1,0 +1,126 @@
+#include <iostream>
+#include <clocale>
+#include <windows.h>
+
+const int tableSizeDiv = 13;
+const int tableSizeMult = 16;
+std::string alphabet[] = {
+    "Аа","Бб","Вв","Гг","Ґґ","Дд","Ее","Єє","Жж","Зз",
+    "Ии","Іі","Її","Йй","Кк","Лл","Мм","Нн","Оо","Пп",
+    "Рр","Сс","Тт","Уу","Фф","Хх","Цц","Чч","Шш","Щщ",
+    "Ьь","Юю","Яя"
+};
+struct openAdressHash {
+    int key;
+    bool occupied;
+    std::string word;
+};
+openAdressHash tableDiv[tableSizeDiv];
+openAdressHash tableMult[tableSizeMult];
+
+int letterValue(char letter) {
+    for (int i = 0;i < std::size(alphabet);i++) {
+        if (alphabet[i][0] == letter || alphabet[i][1] == letter)
+            return i + 1;
+    }
+    return 0;
+}
+
+int wordKey(std::string& word) {
+    int sum = 0;
+    for (int i = 0;i < word.size();i++) {
+        sum += letterValue(word[i]);
+    }
+    return sum;
+}
+int HashDiv(int key) {
+    return key % tableSizeDiv;
+}
+int HashMult(int key) {
+    float A = 0.62;
+    float x = A * key;
+    float frac = x - (int)x;
+    return frac * tableSizeMult;
+}
+int newCell(int h,int i,bool useDiv) {
+    if (useDiv)
+        return (h + i) % tableSizeDiv;
+    else
+        return (h + i) % tableSizeMult;
+}
+
+void insert(openAdressHash table[], int key, bool useDiv,std::string word) {
+    int h;
+    if (useDiv) {
+        h = HashDiv(key);
+
+    }
+    else
+        h = HashMult(key);
+    int tableSize = useDiv ? tableSizeDiv : tableSizeMult;
+    if (!table[h].occupied) {
+        table[h].occupied = true;
+        table[h].word = word;
+        table[h].key = key;
+        return;
+    }
+    else {
+        int newKey=h;
+        for (int i = 1;table[newKey].occupied&&i<tableSize;i++) {
+            newKey = newCell(h, i, useDiv);
+        }
+        table[newKey].occupied = true;
+        table[newKey].word = word;
+        table[newKey].key = key;
+        return;
+    }
+}
+void printTable(openAdressHash table[], int tableSize, const std::string& title) {
+    std::cout << "==============================================\n";
+    std::cout << title << "\n";
+    std::cout << "==============================================\n";
+
+    for (int i = 0; i < tableSize; i++) {
+        std::cout << "[" << i << "] -> ";
+        if (!table[i].occupied)
+            std::cout << "—";
+        else
+            std::cout << table[i].word;
+        std::cout << "\n";
+    }
+
+    std::cout << "==============================================\n\n";
+}
+int main() {
+     SetConsoleOutputCP(65001);
+    std::setlocale(LC_ALL, "");
+
+   
+    for (int i = 0; i < tableSizeDiv; i++) {
+        tableDiv[i].occupied = false;
+    }
+    for (int i = 0; i < tableSizeMult; i++) {
+        tableMult[i].occupied = false;
+    }
+
+  
+    std::string words[] = {
+        "Не", "клади", "всі", "яйця",
+        "в", "один", "кошик", "щоб",
+        "не", "втратити", "все", "одразу"
+    };
+    int n = std::size(words);
+
+    
+    for (int i = 0; i < n; i++) {
+        int K = wordKey(words[i]);
+
+        insert(tableDiv, K, true, words[i]);   
+        insert(tableMult, K, false, words[i]);  
+    }
+
+    printTable(tableDiv, tableSizeDiv, "ЗАКРИТА ХЕШ-ТАБЛИЦЯ (метод ділення)");
+    printTable(tableMult, tableSizeMult, "ЗАКРИТА ХЕШ-ТАБЛИЦЯ (метод множення)");
+
+    return 0;
+}
