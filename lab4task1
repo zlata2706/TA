@@ -1,0 +1,112 @@
+#include <iostream>
+#include <clocale>
+#include <windows.h>
+
+const int tableSizeDiv = 13;
+const int tableSizeMult = 16;
+std::string alphabet[] = {
+    "Аа","Бб","Вв","Гг","Ґґ","Дд","Ее","Єє","Жж","Зз",
+    "Ии","Іі","Її","Йй","Кк","Лл","Мм","Нн","Оо","Пп",
+    "Рр","Сс","Тт","Уу","Фф","Хх","Цц","Чч","Шш","Щщ",
+    "Ьь","Юю","Яя"
+};
+struct Node {
+    int key;
+    std::string word;
+    Node* next;
+};
+
+Node* tableDiv[tableSizeDiv];
+Node* tableMult[tableSizeMult];
+int letterValue(char letter) {
+    for (int i = 0;i < std::size(alphabet);i++) {
+        if (alphabet[i][0] == letter || alphabet[i][1] == letter)
+            return i + 1;
+    }
+    return 0;
+}
+int wordKey(std::string& word) {
+    int sum = 0;
+    for (int i = 0;i < word.size();i++) {
+        sum += letterValue(word[i]);
+    }
+    return sum;
+}
+int HashDiv(int key) {
+    return key % 13;
+}
+int HashMult(int key) {
+    float A = 0.62;
+    float x = A * key;
+    float frac = x - (int)x;
+    return frac*16;
+}
+void insertChaining(int key, const std::string& word, Node* table[], int tableSize, bool useDiv) {
+    int index = useDiv ? HashDiv(key) : HashMult(key);
+    Node* newNode = new Node{ key, word, table[index] };
+    table[index] = newNode;
+}
+
+
+void printTable(Node* table[], int tableSize, bool useDiv) {
+    std::cout << (useDiv ? "\nХеш-таблиця (ділення):\n"
+        : "\nХеш-таблиця (множення):\n");
+
+    for (int i = 0; i < tableSize; i++) {
+        std::cout << i << ": ";
+        Node* curr = table[i];
+
+        if (!curr)
+            std::cout << "-";
+
+        while (curr) {
+            int h = useDiv ? HashDiv(curr->key) : HashMult(curr->key);
+            std::cout << "[" << curr->word<< "]";
+            if (curr->next) std::cout << " -> ";
+            curr = curr->next;
+        }
+        std::cout << "\n";
+    }
+}
+
+int main() {
+    SetConsoleOutputCP(65001);
+    std::setlocale(LC_ALL, "");
+    for (int i = 0; i < tableSizeDiv; i++) tableDiv[i] = nullptr;
+    for (int i = 0; i < tableSizeMult; i++) tableMult[i] = nullptr;
+    std::string words[] = {
+        "Не", "клади", "всі", "яйця",
+        "в", "один", "кошик", "щоб",
+        "не", "втратити", "все", "одразу"
+    };
+    int n = std::size(words);
+
+    std::cout << "\nСлова, їх ключі (K) і хеші(h1 - спосіб ділення,h2 - спосіб множення)\n";
+    std::cout << "---------------------------------------------\n";
+    std::cout << "Слово\t\tK\t h1\t h2\n";
+    std::cout << "---------------------------------------------\n";
+
+    for (int i = 0; i < n; i++) {
+
+        int K = wordKey(words[i]);
+        int h1 = HashDiv(K);
+        int h2 = HashMult(K);
+
+        std::cout << words[i];
+
+        // просте вирівнювання по ширині
+        if (words[i].size() < 6) std::cout << "\t\t";
+        else std::cout << "\t";
+
+        std::cout << K << "\t " << h1 << "\t " << h2 << "\n";
+
+        insertChaining(K, words[i], tableDiv, tableSizeDiv, true);
+        insertChaining(K, words[i], tableMult, tableSizeMult, false);
+    }
+
+    std::cout << "---------------------------------------------\n\n";
+
+    printTable(tableDiv, tableSizeDiv, true);
+    printTable(tableMult, tableSizeMult, false);
+    return 0;
+}
