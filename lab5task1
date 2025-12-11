@@ -1,0 +1,62 @@
+#include <iostream>
+#define INF 99999999999999
+#define SIZE 8
+int matrix[SIZE][SIZE] = {
+		{INF,2,7,5,INF,INF,10,INF},
+		{2,INF,INF,INF,8,INF,INF,INF},
+		{7,INF,INF,INF,INF,5,9,INF},
+		{5,INF,INF,INF,6,4,4,INF},
+		{INF,8,INF,6,INF,3,INF,3},
+		{INF,INF,5,4,3,INF,INF,1},
+		{10,INF,9,4,INF,INF,INF,6},
+		{INF,INF,INF,INF,3,1,6,INF}
+};
+int minEdge(int key[], bool used[]) {
+	int index = -1;
+	int min = INF;
+	for (int i = 0;i < SIZE;i++) {
+		if (!used[i] && key[i] < min) {
+			index = i;
+			min = key[i];
+		}
+	}
+	return index;
+}
+void PRIM() {
+	int key[SIZE];
+	int parent[SIZE];
+	bool used[SIZE];
+	for (int i = 0;i < SIZE;i++) {
+		key[i] = INF;
+		used[i] = false;
+	}
+	key[0] = 0;
+	parent[0] = -1;
+	for (int i = 0;i < SIZE - 1;i++) {
+		int n = minEdge(key, used);
+		used[n] = true;
+		for (int u = 0;u < SIZE;u++) {
+			if (matrix[n][u] != 0 &&
+				matrix[n][u] < INF &&
+				used[u] == false &&
+				matrix[n][u] < key[u])
+			{
+				parent[u] = n;
+				key[u] = matrix[n][u];
+			}
+		}
+	}
+	std::cout << "Prim's Minimum Spanning Tree:\n";
+	int total = 0;
+
+	for (int i = 1; i < SIZE; i++) {
+		std::cout << "Edge: (" << parent[i] + 1 << " - " << i + 1
+			<< "), Weight = " << matrix[i][parent[i]] << std::endl;
+		total += matrix[i][parent[i]];
+	}
+
+	std::cout << "Total weight of MST = " << total << std::endl;
+}
+int main() {
+	PRIM();
+}
