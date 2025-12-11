@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+#define INF 999999999
+#define SIZE 8
+
+int matrix[SIZE][SIZE] = {
+    {INF, 2,   7,   5,   INF, INF, 10,  INF},
+    {2,   INF, INF, INF, 8,   INF, INF, INF},
+    {7,   INF, INF, INF, INF, 5,   9,   INF},
+    {5,   INF, INF, INF, 6,   4,   4,   INF},
+    {INF, 8,   INF, 6,   INF, 3,   INF, 3},
+    {INF, INF, 5,   4,   3,   INF, INF, 1},
+    {10,  INF, 9,   4,   INF, INF, INF, 6},
+    {INF, INF, INF, INF, 3,   1,   6,   INF}
+};
+
+struct Edge {
+    int startVertex;
+    int endVertex;
+    int weight;
+};
+
+int parent[SIZE];
+
+int find_set(int v) {
+    if (parent[v] == v)
+        return v;
+    return find_set(parent[v]);
+}
+
+void union_set(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b)
+        parent[b] = a;
+}
+
+int main() {
+    for (int i = 0; i < SIZE; i++)
+        parent[i] = i;
+
+    vector<Edge> edges;
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = i + 1; j < SIZE; j++) {
+            if (matrix[i][j] < INF) {
+                Edge e;
+                e.startVertex = i;
+                e.endVertex = j;
+                e.weight = matrix[i][j];
+                edges.push_back(e);
+            }
+        }
+    }
+
+    sort(edges.begin(), edges.end(),
+        [](const Edge& a, const Edge& b) {
+            return a.weight < b.weight;
+        });
+
+    vector<Edge> mst;
+    int totalWeight = 0;
+
+    for (int i = 0; i < edges.size(); i++) {
+        int u = find_set(edges[i].startVertex);
+        int v = find_set(edges[i].endVertex);
+
+        if (u != v) {
+            mst.push_back(edges[i]);
+            totalWeight += edges[i].weight;
+            union_set(u, v);
+        }
+    }
+
+    cout << "Kruskal's Minimum Spanning Tree:\n";
+
+    for (auto& e : mst) {
+        cout << "(" << e.startVertex + 1
+            << " - " << e.endVertex + 1
+            << ") Weight = " << e.weight << endl;
+    }
+
+    cout << "Total weight of MST = " << totalWeight << endl;
+
+    return 0;
+}
