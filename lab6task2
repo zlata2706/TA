@@ -1,1 +1,48 @@
+#include <iostream>
+using namespace std;
 
+#define SIZE 8
+#define INF 999999999
+
+int W[SIZE][SIZE] = {
+    {0,   2,   7,   5,   INF, INF, 10,  INF},
+    {2,   0,   INF, INF, 8,   INF, INF, INF},
+    {7,   INF, 0,   INF, INF, 5,   9,   INF},
+    {5,   INF, INF, 0,   6,   4,   4,   INF},
+    {INF, 8,   INF, 6,   0,   3,   INF, 3},
+    {INF, INF, 5,   4,   3,   0,   INF, 1},
+    {10,  INF, 9,   4,   INF, INF, 0,   6},
+    {INF, INF, INF, INF, 3,   1,   6,   0}
+};
+
+int main() {
+    int D[SIZE][SIZE];
+
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
+            D[i][j] = W[i][j];
+
+    for (int k = 0; k < SIZE; k++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (D[i][k] < INF && D[k][j] < INF) {
+                    D[i][j] = min(D[i][j], D[i][k] + D[k][j]);
+                }
+            }
+        }
+    }
+
+    cout << "Matrix of shortest path lengths:\n\n";
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (D[i][j] == INF)
+                cout << "INF ";
+            else
+                cout << D[i][j] << "   ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
